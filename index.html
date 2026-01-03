@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astron Burguer</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries (React, ReactDOM, Babel, Lucide) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Use specific version of lucide-react -->
+    <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Outfit', 'sans-serif'],
+            },
+            colors: {
+              astron: {
+                orange: '#FF6B00',
+                dark: '#050505',
+                card: '#121212',
+              }
+            },
+            animation: {
+              'float': 'float 6s ease-in-out infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'scroll': 'scroll 25s linear infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              scroll: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Custom CSS -->
+    <style>
+      body {
+        background-color: #000;
+        color: #fff;
+        margin: 0;
+      }
+      .glass-panel {
+        background: rgba(18, 18, 18, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+      }
+      .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
+      .mask-fade-sides {
+        mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+      }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- IMPORTS & SETUP ---
+        const { createRoot } = ReactDOM;
+        
+        // Fix: Access lucide-react from correct global variable (camelCase)
+        // Fallback to empty object to prevent destructuring crash if library fails to load
+        const lucideLib = window.lucideReact || window.lucide || {};
+        
+        // Destructure icons
+        const { 
+          MapPin, 
+          CalendarDays, 
+          Rocket, 
+          Instagram, 
+          UtensilsCrossed, 
+          MessageCircle, 
+          Star, 
+          ChevronRight 
+        } = lucideLib;
+
+        // Fallback component in case an icon is missing
+        const FallbackIcon = (props) => {
+            return <span style={{ width: props.size || 24, height: props.size || 24, display: 'inline-block' }}></span>;
+        };
+
+        // --- DATA & CONSTANTS ---
+
+        const BUSINESS_INFO = {
+          name: "ASTRON BURGUER",
+          tagline: "Os melhores burguer do espaço",
+          address: "Av. Newton Belo, nº 443, Santa Inês",
+          city: "Imperatriz - MA",
+          mapsUrl: "https://www.google.com/maps/search/?api=1&query=Av.+Newton+Belo,+443,+Santa+Inês,+Imperatriz+-+MA",
+          hours: {
+            open: "18:00",
+            close: "23:00",
+            label: "Todos os dias"
+          }
+        };
+
+        const LINKS = [
+          {
+            id: 'menu',
+            label: 'Cardápio Digital',
+            subLabel: 'Faça seu pedido agora',
+            url: 'https://astronburger.saipos.com/',
+            icon: UtensilsCrossed || FallbackIcon,
+            primary: true
+          },
+          {
+            id: 'whatsapp',
+            label: 'Falar no WhatsApp',
+            url: 'https://wa.me/5599984673469?text=Ol%C3%A1!%20Vim%20pelo%20cart%C3%A3o%20digital%20e%20gostaria%20de%20fazer%20um%20pedido.',
+            icon: MessageCircle || FallbackIcon
+          },
+          {
+            id: 'instagram',
+            label: 'Siga no Instagram',
+            url: 'https://instagram.com/astronburguer', 
+            icon: Instagram || FallbackIcon
+          },
+          {
+            id: 'location',
+            label: 'Como Chegar',
+            subLabel: 'Ir para o Maps',
+            url: BUSINESS_INFO.mapsUrl,
+            icon: MapPin || FallbackIcon
+          }
+        ];
+
+        const TESTIMONIALS = [
+          { id: 1, name: "Lucas M.", text: "O melhor blend da cidade! Sabor de outro mundo. 🪐", stars: 5 },
+          { id: 2, name: "Ana P.", text: "Atendimento estelar e entrega super rápida.", stars: 5 },
+          { id: 3, name: "Marcos S.", text: "A maionese verde é sensacional!", stars: 5 },
+          { id: 4, name: "Júlia R.", text: "Ambiente top e burguer suculento.", stars: 4 },
+          { id: 5, name: "Pedro H.", text: "Astron nunca decepciona. Virei fã!", stars: 5 },
+        ];
+
+        // --- COMPONENTS ---
+
+        const LinkButton = ({ link }) => {
+          const isPrimary = link.primary;
+          const Icon = link.icon;
+          // Ensure ChevronRight exists
+          const Chevron = ChevronRight || FallbackIcon;
+
+          return (
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group relative flex items-center w-full p-4 mb-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] ${
+                isPrimary
+                  ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-[0_0_20px_rgba(255,107,0,0.3)] border border-orange-400/50'
+                  : 'glass-panel text-gray-100 hover:bg-white/10 hover:border-white/20'
+              }`}
+            >
+              <div className={`p-3 rounded-lg mr-4 transition-colors ${
+                isPrimary ? 'bg-white/20 text-white' : 'bg-white/5 text-astron-orange group-hover:bg-astron-orange group-hover:text-white'
+              }`}>
+                <Icon size={24} strokeWidth={1.5} />
+              </div>
+              
+              <div className="flex-1 text-left">
+                <h3 className={`font-semibold text-lg leading-tight ${isPrimary ? 'text-white' : 'text-gray-100'}`}>
+                  {link.label}
+                </h3>
+                {link.subLabel && (
+                  <p className={`text-xs mt-1 ${isPrimary ? 'text-orange-100' : 'text-gray-400 group-hover:text-gray-300'}`}>
+                    {link.subLabel}
+                  </p>
+                )}
+              </div>
+
+              <Chevron 
+                className={`opacity-50 transition-transform duration-300 group-hover:translate-x-1 group-hover:opacity-100 ${
+                  isPrimary ? 'text-white' : 'text-gray-400'
+                }`} 
+                size={20} 
+              />
+              
+              {isPrimary && (
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/20 pointer-events-none" />
+              )}
+            </a>
+          );
+        };
+
+        const Testimonials = () => {
+          // Double the array for seamless infinite scroll
+          const duplicatedTestimonials = [...TESTIMONIALS, ...TESTIMONIALS];
+          const StarIcon = Star || FallbackIcon;
+
+          return (
+            <div className="w-full mt-8 mb-4">
+              <div className="flex items-center justify-center gap-2 mb-4 opacity-80">
+                <div className="h-px w-8 bg-orange-500/50"></div>
+                <h3 className="text-xs uppercase tracking-widest text-orange-400 font-semibold">Depoimentos</h3>
+                <div className="h-px w-8 bg-orange-500/50"></div>
+              </div>
+
+              <div className="relative w-full overflow-hidden mask-fade-sides">
+                <div className="absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-black/80 to-transparent"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-black/80 to-transparent"></div>
+
+                <div className="flex w-max animate-scroll hover:[animation-play-state:paused]">
+                  {duplicatedTestimonials.map((item, index) => (
+                    <div 
+                      key={`${item.id}-${index}`} 
+                      className="w-64 mx-3 p-4 rounded-xl glass-panel border border-white/5 bg-white/5 flex flex-col gap-2 transition-transform hover:scale-105"
+                    >
+                      <div className="flex gap-1 text-orange-500">
+                        {[...Array(5)].map((_, i) => (
+                          <StarIcon 
+                            key={i} 
+                            size={12} 
+                            fill={i < item.stars ? "currentColor" : "none"} 
+                            className={i < item.stars ? "text-orange-500" : "text-gray-700"}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-200 italic leading-snug">"{item.text}"</p>
+                      <p className="text-xs text-gray-400 font-bold mt-1 text-right">— {item.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const Footer = () => {
+          const year = 2026;
+          const RocketIcon = Rocket || FallbackIcon;
+          
+          return (
+            <footer className="mt-12 pb-8 text-center text-gray-500 text-xs flex flex-col items-center">
+              <div className="flex justify-center items-center gap-2 mb-2 opacity-50">
+                <RocketIcon size={14} />
+                <span>Imperatriz - Maranhão</span>
+              </div>
+              <p className="mb-1">© {year} Astron Burguer. Todos os direitos reservados.</p>
+              <p>
+                Desenvolvido por{" "}
+                <a 
+                  href="https://wa.me/5599991524875" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold transition-colors duration-300 hover:text-astron-orange"
+                >
+                  ARVEY STUDIO
+                </a>
+              </p>
+            </footer>
+          );
+        };
+
+        const App = () => {
+          // Icon safeguards
+          const MapPinIcon = MapPin || FallbackIcon;
+          const CalendarIcon = CalendarDays || FallbackIcon;
+
+          return (
+            <div className="min-h-screen w-full relative overflow-hidden font-sans selection:bg-orange-500 selection:text-white">
+              
+              {/* Background Image & Overlay */}
+              <div className="fixed inset-0 z-0">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+                  style={{ 
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=2799&auto=format&fit=crop")',
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/90 to-black/95" />
+                <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-900/40 via-transparent to-transparent"></div>
+              </div>
+
+              <main className="relative z-10 max-w-lg mx-auto px-6 py-12 flex flex-col items-center min-h-screen">
+                
+                {/* Logo Section */}
+                <div className="mb-8 relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-orange-600 to-yellow-600 rounded-full blur opacity-40 group-hover:opacity-75 transition duration-1000 animate-pulse-slow"></div>
+                  <div className="relative w-32 h-32 rounded-full border-2 border-orange-500/20 bg-black flex items-center justify-center overflow-hidden shadow-2xl">
+                    <img 
+                      src="https://i.imgur.com/d6La8TB.jpg" 
+                      alt="Astron Burguer Logo" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Header Text */}
+                <div className="text-center mb-8 space-y-2">
+                  <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-lg font-sans">
+                    ASTRON <span className="text-astron-orange">BURGUER</span>
+                  </h1>
+                  <p className="text-gray-300 text-sm tracking-wide font-light flex items-center justify-center gap-2">
+                    <span>🪐</span> {BUSINESS_INFO.tagline} <span>🍔</span>
+                  </p>
+                </div>
+
+                {/* Links Container */}
+                <div className="w-full space-y-4 animate-[fadeIn_1s_ease-out]">
+                  {LINKS.map((link) => (
+                    <LinkButton key={link.id} link={link} />
+                  ))}
+                </div>
+
+                {/* Testimonials Section */}
+                <Testimonials />
+
+                {/* Info Card */}
+                <div className="w-full mt-4 p-6 glass-panel rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-white/5 rounded-full text-astron-orange">
+                      <MapPinIcon size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-1">Localização</h3>
+                      <p className="text-gray-400 text-sm leading-relaxed">
+                        {BUSINESS_INFO.address}<br/>
+                        {BUSINESS_INFO.city}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-white/5 rounded-full text-astron-orange">
+                      <CalendarIcon size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-1">Horário</h3>
+                      <p className="text-gray-400 text-sm">
+                        {BUSINESS_INFO.hours.label}<br/>
+                        {BUSINESS_INFO.hours.open} às {BUSINESS_INFO.hours.close}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Footer />
+              </main>
+            </div>
+          );
+        };
+
+        // --- RENDER ---
+        const rootElement = document.getElementById('root');
+        if (!rootElement) {
+          throw new Error("Could not find root element to mount to");
+        }
+        const root = createRoot(rootElement);
+        root.render(<App />);
+    </script>
+</body>
+</html>
